@@ -30,12 +30,12 @@ export class AuthController {
   async login(request: Request, response: Response): Promise<Response> {
     try {
       const { email, password } = request.body;
-      const token = await authService.login(email, password);
+      const { token, role } = await authService.login(email, password);
       console.info(`User logged in successfully: ${email}`);
-      return response.status(200).json({ token });
+      return response.status(200).json({ token, role });
     } catch (error: unknown) {
       if (error instanceof Error && error.message === 'Invalid email or password') {
-      //  console.warn(`Login error: Invalid email or password - ${email}`);
+        console.warn(`Login error: Invalid email or password - ${email}`);
         return response.status(400).json({ message: 'Invalid email or password' });
       }
       console.error('Login error:', error);
