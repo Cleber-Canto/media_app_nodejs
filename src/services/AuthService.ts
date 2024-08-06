@@ -32,7 +32,7 @@ export class AuthService {
     return user;
   }
 
-  async login(email: string, password: string): Promise<string> {
+  async login(email: string, password: string): Promise<{ token: string, role: string }> {
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -48,7 +48,7 @@ export class AuthService {
     );
 
     console.info(`Token generated for user: ${email}`);
-    return token;
+    return { token, role: user.role };
   }
 
   async getAllUsers(): Promise<User[]> {

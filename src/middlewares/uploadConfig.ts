@@ -5,7 +5,7 @@ import { Request } from 'express';
 // Configuração do armazenamento
 const storage = multer.diskStorage({
   destination: (_req, _file, callback) => {
-    callback(null, resolve(__dirname, '..', '..', 'uploads'));
+    callback(null, resolve(__dirname, '..', 'uploads'));
   },
   filename: (_req, file, callback) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -20,7 +20,7 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallb
   if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('audio/')) {
     cb(null, true); // Aceita o arquivo
   } else {
-    cb(new Error('Formato de arquivo não suportado: Apenas imagens e áudios são permitidos'), false); // Rejeita o arquivo
+    cb(new Error('Formato de arquivo não suportado: Apenas imagens e áudios são permitidos') as unknown as null, false); // Rejeita o arquivo
   }
 };
 
@@ -30,4 +30,9 @@ const upload = multer({
   fileFilter,
 });
 
-export default upload;
+const uploadFields = upload.fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'audio', maxCount: 1 }
+]);
+
+export { uploadFields };
