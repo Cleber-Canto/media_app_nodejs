@@ -31,8 +31,16 @@ export const getItem = async (req: Request, res: Response) => {
 export const createItem = async (req: Request, res: Response) => {
   try {
     const { title, artist, album, coverURL, description, isTrack, genero } = req.body;
-    const image = req.files?.['image']?.[0];
-    const audio = req.files?.['audio']?.[0];
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const image = files?.['image']?.[0];
+    const audio = files?.['audio']?.[0];
+
+    console.log('Request body:', req.body);
+    console.log('Files:', req.files);
+
+    if (!title || !artist || !album || !coverURL || !description || !genero) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
 
     const newItem = await itemService.createItem({
       title,
@@ -42,9 +50,10 @@ export const createItem = async (req: Request, res: Response) => {
       description,
       imageUrl: image ? `/uploads/${image.filename}` : '',
       audioUrl: audio ? `/uploads/${audio.filename}` : '',
-      isTrack,
+      isTrack: isTrack === 'true',
       genero,
     });
+
     console.log('Created item:', newItem);
     res.status(201).json(newItem);
   } catch (error) {
@@ -57,8 +66,16 @@ export const updateItem = async (req: Request, res: Response) => {
   try {
     const itemId = req.params.id;
     const { title, artist, album, coverURL, description, isTrack, genero } = req.body;
-    const image = req.files?.['image']?.[0];
-    const audio = req.files?.['audio']?.[0];
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const image = files?.['image']?.[0];
+    const audio = files?.['audio']?.[0];
+
+    console.log('Request body:', req.body);
+    console.log('Files:', req.files);
+
+    if (!title || !artist || !album || !coverURL || !description || !genero) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
 
     const updatedItem = await itemService.updateItem(itemId, {
       title,
@@ -68,13 +85,15 @@ export const updateItem = async (req: Request, res: Response) => {
       description,
       imageUrl: image ? `/uploads/${image.filename}` : undefined,
       audioUrl: audio ? `/uploads/${audio.filename}` : undefined,
-      isTrack,
+      isTrack: isTrack === 'true',
       genero,
     });
+
     if (!updatedItem) {
       console.log(`Item not found for update: ${itemId}`);
       return res.status(404).json({ message: 'Item not found' });
     }
+
     console.log('Updated item:', updatedItem);
     res.json(updatedItem);
   } catch (error) {
@@ -86,11 +105,22 @@ export const updateItem = async (req: Request, res: Response) => {
 export const deleteItem = async (req: Request, res: Response) => {
   try {
     const itemId = req.params.id;
-    await itemService.deleteItem(itemId);
-    console.log(`Deleted item: ${itemId}`);
-    res.status(204).send();
+    const success = await itemService.deleteItem(itemId);
+
+    if (success) {
+      console.log(`Deleted item: ${itemId}`);
+      res.status(200).json({ message: `Item ${itemId} deleted successfully.` });
+    } else {
+      console.log(`Item not found for deletion: ${itemId}`);
+      res.status(404).json({ message: 'Item not found.' });
+    }
   } catch (error) {
     console.error('Error deleting item:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+
+    if (error instanceof Error) {
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    } else {
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
   }
 };
