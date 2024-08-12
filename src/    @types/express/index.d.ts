@@ -6,7 +6,7 @@ declare global {
     interface Request {
       userId?: string;
       files?: {
-        [fieldname: string]: Multer.File[];
+        [fieldname: string]: Express.Multer.File[];
       };
       params: {
         id: string;
