@@ -6,8 +6,12 @@ dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
-export const checkPermission = (_requiredRoles: string[]) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+export interface CustomRequest extends Request {
+  userId?: string;
+}
+
+export const checkPermission = (requiredRoles: string[]) => {
+  return async (req: CustomRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
@@ -25,15 +29,18 @@ export const checkPermission = (_requiredRoles: string[]) => {
       console.log("Decoded token:", decoded);
       console.log("User ID from token:", userId);
 
+      // Comente a verificação do role conforme solicitado
       // if (!requiredRoles.includes(userRole)) {
       //   return res.status(403).json({ message: 'Forbidden: Insufficient permissions' });
       // }
 
       req.userId = userId; // Adiciona o userId ao objeto de requisição
-      next();
+      return next();
     } catch (error) {
       console.log("Failed to authenticate token:", error);
       return res.status(500).json({ message: 'Failed to authenticate token' });
     }
   };
 };
+
+
