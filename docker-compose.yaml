@@ -19,7 +19,7 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/media_api?schema=public"
+      DATABASE_URL:  "postgresql://nodejsmediaappdeploy_pg_user:TDnVVZrEIycYC4RMxPeLevYew6l3AjVv@dpg-cqt205lumphs73c5p4d0-a.ohio-postgres.render.com/nodejsmediaappdeploy_pg"
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules # Adicionado para evitar sobrescrever node_modules
